@@ -257,6 +257,12 @@ def parse_message(msg):
     elif msg_type == 'ACTIVATE_VERSION':
         return ActivateVersionMessage(stream=_required_key(obj, 'stream'),
                                       version=_required_key(obj, 'version'))
+
+    elif msg_type == 'BATCH':
+        return BatchMessage(stream=_required_key(obj, 'stream'),
+                            file=_required_key(obj, 'file'),
+                            file_properties=obj.get('file_properties'))
+
     else:
         return None
 
@@ -328,3 +334,12 @@ def write_version(stream_name, version):
     write_version(stream, version)
     """
     write_message(ActivateVersionMessage(stream_name, version))
+
+
+def write_batch(stream_name, file, file_properties=None):
+    """Write an batch message.
+
+    stream = 'test'
+    file = '/tmp/users0001.jsonl'
+    """
+    write_message(BatchMessage(stream_name, file, file_properties))

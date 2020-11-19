@@ -90,6 +90,15 @@ class TestSinger(unittest.TestCase):
         with self.assertRaises(Exception):
             singer.parse_message('{"type": "STATE"}')
 
+    def test_parse_message_batch_good(self):
+        message = singer.parse_message(
+            '{"type": "BATCH", "stream": "users", "file": "/tmp/users0001.jsonl"}')
+        self.assertEqual(message, singer.BatchMessage(stream='users', file='/tmp/users0001.jsonl'))
+
+    def test_parse_message_batch_missing_value(self):
+        with self.assertRaises(Exception):
+            singer.parse_message('{"type": "BATCH"}')
+
     def test_round_trip(self):
         record_message = singer.RecordMessage(
             record={'name': 'foo'},
@@ -124,6 +133,10 @@ class TestSinger(unittest.TestCase):
 
     def test_write_state(self):
         singer.write_state({"foo": 1})
+
+    def test_write_batch(self):
+        singer.write_batch("users", "/tmp/users0001.jsonl")
+
 
 class TestParsingNumbers(unittest.TestCase):
     def create_record(self, value):
