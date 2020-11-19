@@ -167,6 +167,49 @@ class ActivateVersionMessage(Message):
         }
 
 
+class BatchMessage(Message):
+    """ BATCH message (EXPERIMENTAL).
+
+    The BATCH message has these fields:
+
+      * stream (string) - The name of the stream.
+      * file (string) - The location of a batch file containing serialized records. e.g. '/tmp/users001.jsonl'.
+      * file_properties (dict, optional) - Properties of the batch file.
+
+    Common file_properties include:
+
+      * format (string) - An indication of serialization format. e.g. 'jsonl'.
+      * compression (string) - An indication of file compression format. e.g. 'gzip'.
+
+    If file_properties are not provided, uncompressed jsonl files are assumed.
+
+    A BATCH record points to a collection of messages (from a single stream) serialized to disk,
+    and is implemented for performance reasons. Most Taps and Targets should not need to use
+    BATCH messages at all.
+
+    msg = singer.BatchMessage(
+        stream='users',
+        file='/tmp/users0001.jsonl'
+    )
+
+    """
+
+    def __init__(self, stream, file, file_properties=None):
+        self.stream = stream
+        self.file = file
+        self.file_properties = file_properties
+
+    def asdict(self):
+        result = {
+            'type': 'BATCH',
+            'stream': self.stream,
+            'file': self.file,
+        }
+        if self.file_properties is not None:
+            result['file_properties'] = self.file_properties
+        return result
+
+
 def _required_key(msg, k):
     if k not in msg:
         raise Exception("Message is missing required key '{}': {}".format(k, msg))
