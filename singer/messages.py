@@ -346,7 +346,10 @@ def write_batch(
 ):
     """Write an batch message.
 
-    stream = 'test'
-    file = '/tmp/users0001.jsonl'
+    stream = 'users'
+    filepath = '/tmp/users0001.jsonl'
+    format = 'jsonl'
+    compression = None
+    batch_size = 100000
     """
     write_message(BatchMessage(stream_name, filepath, format, compression, batch_size))
