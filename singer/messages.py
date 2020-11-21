@@ -340,10 +340,13 @@ def write_version(stream_name, version):
     write_message(ActivateVersionMessage(stream_name, version))
 
 
-def write_batch(stream_name, file, file_properties=None):
+def write_batch(
+    stream_name, filepath, format=None,
+    compression=None, batch_size=None
+):
     """Write an batch message.
 
     stream = 'test'
     file = '/tmp/users0001.jsonl'
     """
-    write_message(BatchMessage(stream_name, file, file_properties))
+    write_message(BatchMessage(stream_name, filepath, format, compression, batch_size))
