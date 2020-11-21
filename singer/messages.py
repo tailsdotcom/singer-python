@@ -173,13 +173,10 @@ class BatchMessage(Message):
     The BATCH message has these fields:
 
       * stream (string) - The name of the stream.
-      * file (string) - The location of a batch file containing serialized records. e.g. '/tmp/users001.jsonl'.
-      * file_properties (dict, optional) - Properties of the batch file.
-
-    Common file_properties include:
-
-      * format (string) - An indication of serialization format. e.g. 'jsonl'.
-      * compression (string) - An indication of file compression format. e.g. 'gzip'.
+      * filepath (string) - The location of a batch file containing serialized records. e.g. '/tmp/users001.jsonl'.
+      * format (string, optional) - An indication of serialization format. If none is provided, 'jsonl' will be assumed. e.g. 'csv'.
+      * compression (string, optional) - An indication of file compression format. e.g. 'gzip'.
+      * batch_size (int, optional) - Number of records in this batch. e.g. 100000.
 
     If file_properties are not provided, uncompressed jsonl files are assumed.
 
@@ -189,24 +186,29 @@ class BatchMessage(Message):
 
     msg = singer.BatchMessage(
         stream='users',
-        file='/tmp/users0001.jsonl'
+        filepath='/tmp/users0001.jsonl'
     )
 
     """
 
-    def __init__(self, stream, file, file_properties=None):
+    def __init__(self, stream, filepath, format=None, compression=None, batch_size=None):
         self.stream = stream
-        self.file = file
-        self.file_properties = file_properties
+        self.filepath = filepath
+        self.format = format or 'jsonl'
+        self.compression = compression
+        self.batch_size = batch_size
 
     def asdict(self):
         result = {
             'type': 'BATCH',
             'stream': self.stream,
-            'file': self.file,
+            'filepath': self.filepath,
+            'format': self.format
         }
-        if self.file_properties is not None:
-            result['file_properties'] = self.file_properties
+        if self.compression is not None:
+            result['compression'] = self.compression
+        if self.batch_size is not None:
+            result['batch_size'] = self.batch_size
         return result
 
 
@@ -260,8 +262,10 @@ def parse_message(msg):
 
     elif msg_type == 'BATCH':
         return BatchMessage(stream=_required_key(obj, 'stream'),
-                            file=_required_key(obj, 'file'),
-                            file_properties=obj.get('file_properties'))
+                            filepath=_required_key(obj, 'filepath'),
+                            format=_required_key(obj, 'format'),
+                            compression=obj.get('compression'),
+                            batch_size=obj.get('batch_size'))
 
     else:
         return None
